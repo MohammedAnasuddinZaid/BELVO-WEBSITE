@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STRATEGIST
+  ANALYST
+  CLIENT
+}
+
+enum LeadStatus {
+  NEW
+  QUALIFIED
+  PRIORITY
+  WON
+  LOST
+}
+
+enum ProjectStatus {
+  DISCOVERY
+  ACTIVE
+  PAUSED
+  COMPLETE
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  role      Role      @default(CLIENT)
+  createdAt DateTime  @default(now())
+  projects  Project[]
+}
+
+model Lead {
+  id        String     @id @default(cuid())
+  name      String
+  email     String
+  company   String
+  budget    String
+  service   String
+  message   String
+  status    LeadStatus @default(NEW)
+  score     Int        @default(0)
+  createdAt DateTime   @default(now())
+  bookings  Booking[]
+}
+
+model Project {
+  id        String        @id @default(cuid())
+  client    String
+  budget    Decimal
+  deadline  DateTime?
+  status    ProjectStatus @default(DISCOVERY)
+  ownerId   String?
+  owner     User?         @relation(fields: [ownerId], references: [id])
+  createdAt DateTime      @default(now())
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  date        DateTime
+  time        String
+  service     String
+  meetingType String
+  leadId      String?
+  lead        Lead?    @relation(fields: [leadId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  author    String
+  company   String
+  industry  String
+  text      String
+  createdAt DateTime @default(now())
+}
